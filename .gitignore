@@ -1,0 +1,9 @@
+
+*.sublime-workspace
+*~
+node_modules/
+bower_components/
+build/
+dist/
+lib/
+temp/
