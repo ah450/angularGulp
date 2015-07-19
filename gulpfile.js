@@ -8,7 +8,7 @@ requireDir('./gulp-tasks');
 
 
 gulp.task('clean', function() {
-  var dirs = ['./dist', './build', './lib', './temp'];
+  var dirs = ['./dist', './build', './lib'];
   del.sync(dirs);
   dirs.forEach(function(dir) {
     fs.mkdirSync(dir);
