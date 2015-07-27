@@ -8,6 +8,7 @@ var coffeelint = require('gulp-coffeelint');
 var stylishCoffee = require('coffeelint-stylish');
 var gutil = require('gulp-util');
 var order = require('gulp-order');
+var modernizr = require('gulp-modernizr');
 
 gulp.task('src-js', function() {
   return gulp.src(['src/**/*.js'])
@@ -26,27 +27,49 @@ gulp.task('src-coffee', function() {
     .pipe(gulp.dest('./build/temp'));
 });
 
+gulp.task('modernizr', function() {
+  return gulp.src('src/modernize.coffee')
+    .pipe(coffeelint())
+    .pipe(coffeelint.reporter(stylishCoffee))
+    .pipe(coffee().on('error', gutil.log))
+    .pipe(modernizr())
+    .pipe(gulp.dest('build/temp'));
+});
 
-gulp.task('scripts-no-tempaltes', ['bower', 'src-js', 'src-coffee'], function() {
-  return gulp.src(['lib/**/*.js', 'build/temp/app-src.js', 'build/temp/coffee.js'])
+
+gulp.task('scripts-no-tempaltes', ['bower', 'src-js', 'src-coffee', 'modernizr'], function() {
+  return gulp.src(['lib/**/*.js', 'build/temp/modernizr.js', 'build/temp/app-src.js', 'build/temp/coffee.js'])
     .pipe(order([
-      'lib/angular/angular.js',
-      'lib/**/*.js'
+      'lib/jquery/**/*.js',
+      'lib/angular/*.js',
+      'lib/**/*.js',
+      'build/temp/modernizr.js'
       ], { base: './'}))
     .pipe(concat('app-no-template.js'))
     .pipe(gulp.dest('build/temp'));
 });
 
-gulp.task('scripts', ['scripts-no-tempaltes', 'templates'], function() {
+gulp.task('scripts', ['scripts-no-tempaltes', 'templates', 'polyfills'], function() {
   return gulp.src(['build/temp/app-no-template.js', 'build/templates/*.js' ])
     .pipe(concat('app.js'))
     .pipe(gulp.dest('build/'));
 });
 
-gulp.task('uglify', ['scripts-no-tempaltes', 'templates-min'], function() {
+gulp.task('uglify', ['scripts-no-tempaltes', 'templates-min', 'polyfills-min'], function() {
   return gulp.src(['build/temp/app-no-template.js', 'build/temp/partials.min.js'])
     .pipe(concat('app.js'))
     .pipe(ngAnnotate())
     .pipe(uglify())
     .pipe(gulp.dest('dist/'));
+});
+
+gulp.task('polyfills', function() {
+  return gulp.src('polyfills/**/*.js')
+    .pipe(gulp.dest('build/polyfills'));
+});
+
+gulp.task('polyfills-min', function() {
+  return gulp.src('polyfills/**/*.js')
+    .pipe(uglify())
+    .pipe(gulp.dest('dist/polyfills'));
 });

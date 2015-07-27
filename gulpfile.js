@@ -1,17 +1,24 @@
 var gulp = require('gulp');
 var fs = require('fs');
-var del = require('del');
 var connect = require('gulp-connect');
 var watch = require('gulp-watch');
 var requireDir = require('require-dir');
+var gzip = require('gulp-gzip');
+var rimraf = require('rimraf');
 requireDir('./gulp-tasks');
 
 
 gulp.task('clean', function() {
   var dirs = ['./dist', './build', './lib'];
-  del.sync(dirs);
+  rimraf.sync('lib')
   dirs.forEach(function(dir) {
-    fs.mkdirSync(dir);
+    try {
+      fs.mkdirSync(dir);
+    } catch(e) {
+      if (e.code != 'EEXIST') {
+        throw e;
+      }
+    }
   });
 });
 
@@ -23,7 +30,7 @@ gulp.task('webserver', ['assets', 'scripts', 'watch', 'css', 'manifest'], functi
 });
 
 gulp.task('watch', function() {
-  watch(['./src/**', './images/**'], function() {
+  watch(['./src/**', './images/**', './polyfills/**'], function() {
     gulp.start('reload')
   });
 });
@@ -41,5 +48,16 @@ gulp.task('default', ['dev']);
 
 
 gulp.task('dist', ['clean'], function() {
-  return gulp.start('uglify', 'css-min', 'assets', 'manifest-dist');
+  return gulp.start('compress');
+});
+
+gulp.task('compress', ['uglify', 'css-min', 'assets', 'manifest-dist'], function() {
+  return gulp.src('dist/**/*.{html,css,js}')
+    .pipe(gzip({
+      append: true,
+      gzipOptions: {
+        level: 6
+      }
+    }))
+    .pipe(gulp.dest('dist'));
 });
