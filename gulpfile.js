@@ -52,7 +52,7 @@ gulp.task('dist', ['clean'], function() {
 });
 
 gulp.task('compress', ['uglify', 'css-min', 'assets', 'manifest-dist'], function() {
-  return gulp.src('dist/**/*.{html,css,js}')
+  return gulp.src('dist/**/*.{html,css,js,eot,svg,ttf}')
     .pipe(gzip({
       append: true,
       gzipOptions: {

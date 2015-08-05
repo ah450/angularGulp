@@ -4,8 +4,8 @@ var manifest = require('gulp-manifest');
 var manifestOptions = {
   hash: false,
   timestamp: true,
-  filename: '.appcache', // change name
-  exclude: '.appcache'
+  filename: 'name.appcache',
+  exclude: 'name.appcache'
 };
 
 

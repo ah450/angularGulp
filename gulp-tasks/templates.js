@@ -5,7 +5,7 @@ var ngHTML2JS = require('gulp-ng-html2js');
 var minifyHtml = require("gulp-minify-html");
 
 var html2jsOptions = {
-  moduleName: '-templates', // change name
+  moduleName: 'name-templates',
   prefix: 'views/'
 };
 
