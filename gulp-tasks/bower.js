@@ -11,6 +11,6 @@ gulp.task('bower-install', function() {
 
 gulp.task('bower', ['bower-install'], function() {
   // moves main files to lib folder
-  return gulp.src(mainBowerFiles(), {base: './bower_components'})
-    .pipe(gulp.dest('./lib'));
+  return gulp.src(mainBowerFiles(), {base: 'bower_components'})
+    .pipe(gulp.dest('lib'));
 });

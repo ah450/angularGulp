@@ -1,8 +1,0 @@
-*.sublime-*
-*~
-node_modules/
-bower_components/
-build/
-dist/
-lib/
-temp/

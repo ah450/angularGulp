@@ -1,7 +1,6 @@
 // static assets
 var gulp = require('gulp');
 var minifyHtml = require("gulp-minify-html");
-
 gulp.task('assets',['move-index', 'move-images', 'move-index-min', 'move-fonts']);
 
 gulp.task('move-index', function() {
@@ -22,8 +21,8 @@ gulp.task('move-images', function() {
 });
 
 gulp.task('move-fonts', function() {
-  return gulp.src('fonts/*', {base: './'})
-    .pipe(gulp.dest('dist'))
-    .pipe(gulp.dest('build'));
+  return gulp.src(['fonts/*'])
+    .pipe(gulp.dest('dist/fonts'))
+    .pipe(gulp.dest('build/fonts'));
 });
 

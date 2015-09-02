@@ -4,8 +4,8 @@ var manifest = require('gulp-manifest');
 var manifestOptions = {
   hash: false,
   timestamp: true,
-  filename: 'name.appcache',
-  exclude: 'name.appcache'
+  filename: 'app.appcache',
+  exclude: 'app.appcache'
 };
 
 
@@ -16,7 +16,7 @@ gulp.task('manifest', ['scripts', 'assets', 'css'], function() {
 });
 
 gulp.task('manifest-dist', ['uglify', 'assets', 'css-min'], function() {
-  return gulp.src(['dist/**'])
+  return gulp.src(['dist/**', '!dist/polyfills/**/*'])
     .pipe(manifest(manifestOptions))
     .pipe(gulp.dest('./dist'));
 });

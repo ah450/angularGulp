@@ -1,3 +1,6 @@
-/*
- * Main Layout
- */
+@import 'partials/reset';
+@import 'partials/variables';
+@import 'partials/mixins';
+@import 'vendor/main';
+@import 'animations/main';
+@import 'widgets/main';

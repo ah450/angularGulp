@@ -1,27 +1,26 @@
 var gulp = require('gulp');
 var gulp = require('gulp');
 var concat = require('gulp-concat');
-var ngHTML2JS = require('gulp-ng-html2js');
-var minifyHtml = require("gulp-minify-html");
+var templateCache = require('gulp-angular-templatecache');
+var minifyHtml = require('gulp-minify-html');
 
-var html2jsOptions = {
-  moduleName: 'name-templates',
-  prefix: 'views/'
+var templateOptions = {
+   standalone: true,
+   module: 'appTemplates'
 };
 
 gulp.task('templates', function() {
   // Turns templates to html
-  return gulp.src(['src/views/**/*.html'])
-    .pipe(ngHTML2JS(html2jsOptions))
+  return gulp.src('src/views/**/*.html')
+    .pipe(templateCache('templates.js', templateOptions))
     .pipe(gulp.dest('./build/templates'));
 });
 
 gulp.task('templates-min', function() {
-  return gulp.src(['src/views/**/*.html'])
+  return gulp.src('src/views/**/*.html')
     .pipe(minifyHtml({
       empty: true
     }))
-    .pipe(ngHTML2JS(html2jsOptions))
-    .pipe(concat('partials.min.js'))
+    .pipe(templateCache('templates.min.js', templateOptions))
     .pipe(gulp.dest('./build/temp/'));
-})
+});
