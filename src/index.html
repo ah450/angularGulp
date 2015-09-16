@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html data-ng-app="app">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title data-ng-bind="($title || '')"></title>
+  <link href="main.css" rel="stylesheet">
+  <link rel="icon" type="image/png" href="images/favicon.png">
+</head>
+<body>
+<section data-ui-view class="wrapper" id="main-view"></section>
+<script>
+  var polyfilter_scriptpath = '/polyfills/filters/lib/';
+</script>
+<script type="text/javascript">
+    WebFontConfig = {
+      google: { families: [ 'Roboto:400,100,700,900:latin', 'Roboto+Condensed:400,300:latin', 'Noto+Serif:400,700:latin','Material+Icons' ] }
+    };
+    (function() {
+      var wf = document.createElement('script');
+      wf.src = ('https:' == document.location.protocol ? 'https' : 'http') +
+        '://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js';
+      wf.type = 'text/javascript';
+      wf.async = 'true';
+      var s = document.getElementsByTagName('script')[0];
+      s.parentNode.insertBefore(wf, s);
+    })();
+  </script>
+  <script src="app.js" charset="UTF-8"></script>
+</body>
+</html>

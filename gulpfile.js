@@ -1,18 +1,41 @@
 var gulp = require('gulp');
 var fs = require('fs');
-var watch = require('gulp-watch');
-var requireDir = require('require-dir');
 var gzip = require('gulp-gzip');
+var merge = require('merge2');
+var concat = require('gulp-concat');
+var minimist = require('minimist');
+var uglify = require("gulp-uglify");
+var ngAnnotate = require('gulp-ng-annotate');
+var minifyHtml = require('gulp-minify-html');
+var connect = require('gulp-connect');
+var modRewrite = require('connect-modrewrite');
+var bower = require('gulp-bower');
+var mainBowerFiles = require('main-bower-files');
+var css = require('gulp-tasks/css');
+var assets = require('gulp-tasks/assets');
+var polyfills = require('gulp-tasks/polyfills');
+var templates = require('gulp-tasks/templates');
+var scripts = require('gulp-tasks/scripts');
 var rimraf = require('rimraf');
-var runSequence = require('run-sequence');
-requireDir('./gulp-tasks');
+var watch = require('gulp-watch');
 
+gulp.task('bower-install', function() {
+  // Runs bower install
+  return bower()
+    .pipe(gulp.dest('./bower_components'));
+});
 
-gulp.task('clean', function() {
-  var dirs = ['dist', 'build', 'lib', 'build/temp', 'build/test', 'compiledSpecs', 'coverage'];
+gulp.task('bower', ['bower-install', 'create-dirs'], function() {
+  // moves main files to lib folder
+  return gulp.src(mainBowerFiles(), {base: 'bower_components'})
+    .pipe(gulp.dest('libs'));
+});
+
+gulp.task('create-dirs', function() {
+  var dirs = ['build', 'dist', 'libs'];
+  rimraf.sync('libs');
   dirs.forEach(function(dir) {
     try {
-      rimraf.sync(dir);
       fs.mkdirSync(dir);
     } catch(e) {
       if (e.code != 'EEXIST') {
@@ -22,53 +45,80 @@ gulp.task('clean', function() {
   });
 });
 
-gulp.task('dummy_dev_helper', ['assets', 'scripts', 'css', 'manifest']);
 
-gulp.task('dummy_dev', function(done) {
-  return runSequence('clean', 'dummy_dev_helper', done);
+
+gulp.task('default', ['build']);
+
+gulp.task('build', ['create-dirs', 'bower'], function() {
+    var cssStream = css.processSass();
+    var scriptStream = scripts.processScripts();
+    var dependenciesStream = scripts.processDeps();
+    var routesStream = scripts.processRoutes();
+    var templatesStream = templates.processTemplates();
+    var index = gulp.src('src/index.html');
+    var assetsStream = assets.processAssets();
+    var polyfillsStream = polyfills.processPolyfills();
+    var js = merge(dependenciesStream, templatesStream, scriptStream, routesStream)
+      .pipe(concat('app.js'));
+    var streams = merge([cssStream, js, assetsStream, polyfillsStream, index]);
+    return streams.pipe(gulp.dest('build'))
+});
+
+var options = minimist(process.argv.slice(2), {
+  string: 'dest',
+  default: {dest: 'dist'}
+})
+
+gulp.task('production-helper', ['create-dirs', 'bower'], function() {
+  var cssStream = css.minifyCss(css.processSass());
+  var scriptStream = scripts.processScripts().pipe(ngAnnotate()).pipe(uglify());
+  var dependenciesStream = scripts.processDeps().pipe(uglify());
+  var routesStream = scripts.processRoutes().pipe(uglify({mangle: false}));
+  var templatesStream = templates.minifyTemplates();
+  var assetsStream = assets.processAssets();
+  var index = gulp.src('src/index.html').pipe(minifyHtml({
+      empty: true
+    }));
+  var polyfillsStream = polyfills.processPolyfills();
+  var js = merge(dependenciesStream, templatesStream, scriptStream, routesStream)
+    .pipe(concat('app.js'));
+  var streams = merge([cssStream, js, assetsStream, polyfillsStream, index]);
+  return streams
+    .pipe(gulp.dest(options.dest));
+});
+
+gulp.task('production', ['production-helper'], function () {
+  var src = [options.dest, '**', '*.{html,css,js,eot,svg,ttf,otf}'].join('/');
+  return gulp.src(src)
+    .pipe(gzip({ gzipOptions: { level: 9 } }))
+    .pipe(gulp.dest(options.dest));
 });
 
 
-
-gulp.task('watch', function() {
-  watch(['./src/**', './images/**', './polyfills/**', 'bower.json'], function() {
-    gulp.start('reload');
+gulp.task('server', ['build'], function() {
+  connect.server({
+    livereload: true,
+    root: 'build',
+    port: 8000,
+    middleware: function() {
+      return [
+        modRewrite([
+          '^/api/(.*)$ http://localhost:3000/api/$1 [P]'
+        ])
+      ];
+    }
   });
 });
 
-
-
-gulp.task('dev', function(done) {
-  return runSequence('clean', 'webserver-watch', done);
+gulp.task('reload', ['build'], function() {
+  return gulp.src('./build/**/*')
+    .pipe(connect.reload());
 });
 
-gulp.task('build', ['dummy_dev']);
+gulp.task('dev', ['watch', 'server']);
 
-gulp.task('default', ['dev']);
-
-
-gulp.task('dist', function(done) {
-  return runSequence('clean', 'compress', done);
-});
-
-gulp.task('compress', ['uglify', 'css-min', 'assets', 'manifest-dist'], function() {
-  return gulp.src('dist/**/*.{html,css,js,eot,svg,ttf,otf}')
-    .pipe(gzip({
-      append: true,
-      gzipOptions: {
-        level: 9
-      }
-    }))
-    .pipe(gulp.dest('dist'));
-});
-
-
-gulp.task('rails:production', ['dist'], function() {
-  return gulp.src('dist/**/*')
-    .pipe(gulp.dest('../public'));
-});
-
-gulp.task('rails:dev', ['dummy_dev'], function() {
-  return gulp.src('build/**/*')
-    .pipe(gulp.dest('../public'));
+gulp.task('watch', function() {
+  watch(['./src/**', './images/**', './polyfillsStream/**', 'bower.json'], function() {
+    gulp.start('reload');
+  });
 });

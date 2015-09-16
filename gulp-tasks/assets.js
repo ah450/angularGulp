@@ -1,28 +1,8 @@
-// static assets
 var gulp = require('gulp');
-var minifyHtml = require("gulp-minify-html");
-gulp.task('assets',['move-index', 'move-images', 'move-index-min', 'move-fonts']);
 
-gulp.task('move-index', function() {
-  return gulp.src('src/index.html')
-    .pipe(gulp.dest('./build'));
-});
+function processAssets() {
+  return gulp.src('images/**/*', {base: '.'});
+}
 
-gulp.task('move-index-min', function() {
-  return gulp.src('src/index.html')
-    .pipe(minifyHtml())
-    .pipe(gulp.dest('dist'));
-});
 
-gulp.task('move-images', function() {
-  return gulp.src('images/*', {base: './'})
-    .pipe(gulp.dest('dist'))
-    .pipe(gulp.dest('build'));
-});
-
-gulp.task('move-fonts', function() {
-  return gulp.src(['fonts/*'])
-    .pipe(gulp.dest('dist/fonts'))
-    .pipe(gulp.dest('build/fonts'));
-});
-
+exports.processAssets = processAssets;
