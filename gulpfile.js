@@ -11,11 +11,11 @@ var connect = require('gulp-connect');
 var modRewrite = require('connect-modrewrite');
 var bower = require('gulp-bower');
 var mainBowerFiles = require('main-bower-files');
-var css = require('gulp-tasks/css');
-var assets = require('gulp-tasks/assets');
-var polyfills = require('gulp-tasks/polyfills');
-var templates = require('gulp-tasks/templates');
-var scripts = require('gulp-tasks/scripts');
+var css = require('./gulp-tasks/css');
+var assets = require('./gulp-tasks/assets');
+var polyfills = require('./gulp-tasks/polyfills');
+var templates = require('./gulp-tasks/templates');
+var scripts = require('./gulp-tasks/scripts');
 var rimraf = require('rimraf');
 var watch = require('gulp-watch');
 
